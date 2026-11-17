@@ -102,24 +102,36 @@ export function stageShot(name, seeds = [9, 21, 33, 45]) {
   }
 
   if (name === 'threat') {
-    // Fly until something with eyes is close enough to matter: the frame is the moment the player
-    // has to decide, not a posed arrangement of meshes.
-    for (const seed of seeds) {
-      const run = createRun({ seed, best: 0 });
-      start(run);
-      let closest = Infinity;
-      for (let i = 0; i < 60 * 90 && run.state === 'playing'; i += 1) {
-        step(run, autopilotInput(run), STEP);
-        run.events.length = 0;
-        const near = run.drifters.reduce(
-          (best, d) => Math.min(best, Math.hypot(d.x - run.skiff.x, d.y - run.skiff.y, d.z - run.skiff.z)),
-          Infinity,
-        );
-        closest = Math.min(closest, near);
-        if (near < 7.5) return run;
-      }
-      if (closest < 12) return run;
+    // One bounded flight, close to whichever drifter the trench puts nearest: cheap enough to
+    // stage at load, and still the real rules and the real creatures.
+    const run = createRun({ seed: seeds[0], best: 0 });
+    start(run);
+    let closest = Infinity;
+    for (let i = 0; i < 60 * 55 && run.state === 'playing'; i += 1) {
+      step(run, autopilotInput(run), STEP);
+      run.events.length = 0;
+      const near = run.drifters.reduce(
+        (best, d) => Math.min(best, Math.hypot(d.x - run.skiff.x, d.y - run.skiff.y, d.z - run.skiff.z)),
+        Infinity,
+      );
+      if (near < closest) closest = near;
+      if (near < 9 && run.depth > 260) break;
     }
+    return run;
+  }
+
+  if (name === 'sonar') {
+    // Fly a normal dive, then use the ability the game gives the player: the pulse is fired by the
+    // same rule the player's click runs, and the frame catches it mid-expansion.
+    const run = createRun({ seed: seeds[0], best: 0 });
+    start(run);
+    fly(run, 34);
+    if (run.state === 'playing' && run.sonar > 0) {
+      fireSonar(run);
+      for (let i = 0; i < 9; i += 1) step(run, { thrust: 1, strafe: 0, lift: 0, boost: false, lookYaw: 0, lookPitch: 0 }, STEP);
+      run.events.length = 0;
+    }
+    return run;
   }
 
   if (name === 'paused') {

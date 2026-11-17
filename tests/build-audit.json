@@ -3,12 +3,12 @@
     {
       "name": "both runs rebuild to the same dossier",
       "ok": true,
-      "detail": "7449a78a2179b48a664fdda4b7c7f894356c54bf34c85a25d49312d87baebed9"
+      "detail": "37b330cd0255414c223a3bf5d71fd47262eddb8d6400b85de2588491b6a6d950"
     },
     {
       "name": "dossier.json matches an independent helper rebuild",
       "ok": true,
-      "detail": "381766 bytes, sha256 7449a78a2179b48a664fdda4b7c7f894356c54bf34c85a25d49312d87baebed9"
+      "detail": "438388 bytes, sha256 37b330cd0255414c223a3bf5d71fd47262eddb8d6400b85de2588491b6a6d950"
     },
     {
       "name": "every game/ path within 1000 UTF-8 bytes",
@@ -18,7 +18,7 @@
     {
       "name": "every reference resolves inside game/",
       "ok": true,
-      "detail": "1 script tag(s), 17 modules scanned, 1 in the import walk"
+      "detail": "1 script tag(s), 18 modules scanned, 1 in the import walk"
     },
     {
       "name": "every screenshot long side <= 1280 and short side >= 480",
@@ -28,27 +28,27 @@
     {
       "name": "every screenshot within 256 KiB",
       "ok": true,
-      "detail": "1-title.jpg 85377 · 2-dive.jpg 43118 · 3-threat.jpg 38724 · 4-result.jpg 52820"
+      "detail": "1-title.jpg 80484 · 2-dive.jpg 53262 · 3-threat.jpg 67191 · 4-result.jpg 54056"
     },
     {
       "name": "every source module parses as ESM",
       "ok": true,
-      "detail": "17 modules checked with node --check"
+      "detail": "18 modules checked with node --check"
     },
     {
       "name": "game/ bytes within 48 MiB",
       "ok": true,
-      "detail": "2218746 bytes"
+      "detail": "2228450 bytes"
     },
     {
       "name": "game/ entry count within 993",
       "ok": true,
-      "detail": "26 files and directories"
+      "detail": "27 files and directories"
     },
     {
       "name": "index.html is a regular file within 1 MiB",
       "ok": true,
-      "detail": "12037 bytes"
+      "detail": "12286 bytes"
     },
     {
       "name": "no network address in index.html",
@@ -58,12 +58,12 @@
     {
       "name": "no secrets or private paths in the shipped text",
       "ok": true,
-      "detail": "20 shipped files scanned"
+      "detail": "21 shipped files scanned"
     },
     {
       "name": "no source was cut from the dossier",
       "ok": true,
-      "detail": "85266 bytes of dossier text"
+      "detail": "95038 bytes of dossier text"
     },
     {
       "name": "screenshot names are URL-safe",
@@ -83,7 +83,7 @@
     {
       "name": "two runs write identical paths",
       "ok": true,
-      "detail": "24 paths in run A"
+      "detail": "25 paths in run A"
     },
     {
       "name": "vendor/makefun-game.ts is the kit copy",
@@ -93,48 +93,48 @@
   ],
   "failures": [],
   "summary": {
-    "node": "v26.12.1",
+    "node": "v22.22.0",
     "outputs": {
-      "a": "7449a78a2179b48a664fdda4b7c7f894356c54bf34c85a25d49312d87baebed9",
-      "paths": 24
+      "a": "37b330cd0255414c223a3bf5d71fd47262eddb8d6400b85de2588491b6a6d950",
+      "paths": 25
     },
-    "dossierBytes": 381766,
+    "dossierBytes": 438388,
     "game": {
-      "entries": 26,
-      "files": 19,
-      "bytes": 2218746
+      "entries": 27,
+      "files": 20,
+      "bytes": 2228450
     },
     "screenshots": [
       {
         "name": "1-title.jpg",
-        "bytes": 85377,
+        "bytes": 80484,
         "w": 1280,
         "h": 720,
         "kind": "jpeg"
       },
       {
         "name": "2-dive.jpg",
-        "bytes": 43118,
+        "bytes": 53262,
         "w": 1280,
         "h": 720,
         "kind": "jpeg"
       },
       {
         "name": "3-threat.jpg",
-        "bytes": 38724,
+        "bytes": 67191,
         "w": 1280,
         "h": 720,
         "kind": "jpeg"
       },
       {
         "name": "4-result.jpg",
-        "bytes": 52820,
+        "bytes": 54056,
         "w": 1280,
         "h": 720,
         "kind": "jpeg"
       }
     ],
-    "modules": 17,
+    "modules": 18,
     "passed": 18,
     "failed": 0
   }

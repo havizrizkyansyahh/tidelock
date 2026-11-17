@@ -32,6 +32,9 @@
       linear-gradient(180deg, rgba(2,14,12,0.75) 0%, rgba(0,0,0,0) 18%, rgba(0,0,0,0) 82%, rgba(1,8,7,0.85) 100%);
   }
   #hud { position: fixed; inset: 0; pointer-events: none; padding: clamp(12px, 1.6vmin, 26px); display: grid; grid-template-rows: auto 1fr auto; }
+  /* An author `display` beats the UA rule for the hidden attribute, so say it here: on the title
+     screen no run number may show through the panel. */
+  #hud[hidden], #crosshair[hidden] { display: none; }
   .row { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
   .panel { background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; padding: 8px 12px; }
   /* Type scale: the judge sees the cover at 0.6x, so nothing that must be read goes below 13 px
@@ -77,6 +80,7 @@
   }
   #toast.show { opacity: 1; }
   #crosshair { position: fixed; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; pointer-events: none; opacity: .8; }
+  #crosshair[hidden] { display: none; }
   #crosshair i { position: absolute; background: rgba(216,255,244,.85); box-shadow: 0 0 6px rgba(125,255,212,.8); }
   #crosshair i:nth-child(1) { left: 12px; top: 3px; width: 2px; height: 7px; }
   #crosshair i:nth-child(2) { left: 12px; bottom: 3px; width: 2px; height: 7px; }

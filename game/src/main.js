@@ -4,6 +4,7 @@ import { Render } from './view/render.js';
 import { TrenchView } from './view/trenchview.js';
 import { EntitiesView } from './view/entitiesview.js';
 import { LightShafts } from './view/lightshafts.js';
+import { Landmarks } from './view/landmarks.js';
 import { Hud } from './ui/hud.js';
 import { Screens } from './ui/screens.js';
 import { Sound } from './audio/audio.js';
@@ -16,6 +17,7 @@ const render = new Render(canvas);
 const trench = new TrenchView(render.scene);
 const entities = new EntitiesView(render.scene);
 const shafts = new LightShafts(render.scene);
+const landmarks = new Landmarks(render.scene);
 const hud = new Hud(document);
 const screens = new Screens(document);
 const sound = new Sound();
@@ -44,6 +46,7 @@ let mutedNote = 0;
 let lastStrafe = 0;
 /** Which overlay the player is looking at: separate from the simulation's own state. */
 let ui = 'title';
+const crosshair = document.getElementById('crosshair');
 
 function presentScreens() {
   if (shotMode) {
@@ -51,6 +54,7 @@ function presentScreens() {
     hud.show(true);
     if (shot === 'title') {
       hud.show(false);
+      crosshair.hidden = true;
       screens.title(run.best);
     }
     if (shot === 'result') screens.result(run);
@@ -58,6 +62,7 @@ function presentScreens() {
     return;
   }
   hud.show(false);
+  crosshair.hidden = true;
   screens.title(run.best);
 }
 
@@ -71,6 +76,7 @@ function beginDive() {
   hud.reset();
   screens.hideAll();
   hud.show(true);
+  crosshair.hidden = false;
   input.lock();
 }
 
@@ -153,6 +159,8 @@ function draw(dt = 0) {
   render.placeCamera(run.skiff, run.time, run.skiff.speed, lastStrafe, dt);
   trench.update(run, run.reveal);
   shafts.update(run, run.time);
+  landmarks.update(run, run.time);
+  landmarks.applyDepthPalette(render.scene.fog, render.scene.background, run.depth);
   entities.update(run, render.camera, run.time);
   render.render();
   hud.update(run, nextBeacon(run));
