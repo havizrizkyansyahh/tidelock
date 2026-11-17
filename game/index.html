@@ -60,7 +60,10 @@
   #prompt { text-align: center; font-size: clamp(13px, 1.6vmin, 18px); letter-spacing: .16em; color: var(--beacon); opacity: 0; transition: opacity .15s; }
   #prompt.show { opacity: 1; }
   #threat { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 120px rgba(255,95,109,0); transition: box-shadow .25s; }
-  #threat.hot { box-shadow: inset 0 0 140px rgba(255,95,109,.45); }
+  /* A thin warning frame rather than a huge inset shadow: full-screen blurs and wide shadows cost
+     real milliseconds when the browser has no GPU, and the trench already carries the mood. */
+  #threat { border: 2px solid rgba(255,95,109,0); transition: border-color .25s; }
+  #threat.hot { border-color: rgba(255,95,109,.55); }
   /* Feedback layers: a damage wash, a sonar bloom, a milestone toast, and the crosshair. */
   #flash, #bloom { position: fixed; inset: 0; pointer-events: none; opacity: 0; }
   #flash { background: radial-gradient(ellipse at 50% 55%, rgba(255,95,109,0) 40%, rgba(255,95,109,.55) 100%); }

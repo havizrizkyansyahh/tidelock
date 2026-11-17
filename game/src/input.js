@@ -70,17 +70,20 @@ export class Input {
     const strafe = this.pointerLocked
       ? (held.has('strafeRight') ? 1 : 0) - (held.has('strafeLeft') ? 1 : 0)
       : 0;
-    const yawKeys = this.pointerLocked
-      ? (held.has('strafeRight') ? -0.4 : 0) + (held.has('strafeLeft') ? 0.4 : 0)
-      : (held.has('yawLeft') ? 1.3 : 0) - (held.has('yawRight') ? 1.3 : 0);
+    // A keyboard turn is a rate in radians per second; a mouse move is an angle already turned.
+    // They are reported apart so the loop can convert the mouse into a rate for this frame.
+    const yawRate = this.pointerLocked
+      ? (held.has('strafeLeft') ? 0.5 : 0) - (held.has('strafeRight') ? 0.5 : 0)
+      : (held.has('yawLeft') ? 1.6 : 0) - (held.has('yawRight') ? 1.6 : 0);
     const lift = (held.has('noseUp') ? 1 : 0) - (held.has('noseDown') ? 1 : 0);
     const stick = {
       thrust,
       strafe,
       lift,
       boost: held.has('boost'),
-      lookYaw: this.lookYaw + yawKeys * 0.016,
+      lookYaw: this.lookYaw,
       lookPitch: this.lookPitch,
+      yawRate,
     };
     this.lookYaw = 0;
     this.lookPitch = 0;

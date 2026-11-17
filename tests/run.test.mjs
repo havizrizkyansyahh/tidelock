@@ -271,3 +271,16 @@ test('the generated world actually carries rock, spores and drifters into the di
     assert.ok(Math.hypot(rock.x, rock.y / 0.8) <= run.radius + 0.001, `rock ${rock.id} sits outside the trench`);
   }
 });
+
+test('a yaw rate of one radian per second turns the skiff a radian in a second', () => {
+  const run = bareRun();
+  const turn = { ...IDLE, lookYaw: 1 };
+  runFor(run, 1, turn);
+  assert.ok(Math.abs(run.skiff.yaw - 1) < 0.02, `yaw ${run.skiff.yaw}`);
+  // Steering must not depend on the frame rate: 60 small steps and 240 smaller ones agree.
+  const coarse = bareRun();
+  for (let i = 0; i < 60; i += 1) step(coarse, turn, 1 / 60);
+  const fine = bareRun();
+  for (let i = 0; i < 240; i += 1) step(fine, turn, 1 / 240);
+  assert.ok(Math.abs(coarse.skiff.yaw - fine.skiff.yaw) < 0.02, `${coarse.skiff.yaw} vs ${fine.skiff.yaw}`);
+});

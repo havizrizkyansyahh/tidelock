@@ -101,6 +101,27 @@ export function stageShot(name, seeds = [9, 21, 33, 45]) {
     return flyToBeacon(run, depth);
   }
 
+  if (name === 'threat') {
+    // Fly until something with eyes is close enough to matter: the frame is the moment the player
+    // has to decide, not a posed arrangement of meshes.
+    for (const seed of seeds) {
+      const run = createRun({ seed, best: 0 });
+      start(run);
+      let closest = Infinity;
+      for (let i = 0; i < 60 * 90 && run.state === 'playing'; i += 1) {
+        step(run, autopilotInput(run), STEP);
+        run.events.length = 0;
+        const near = run.drifters.reduce(
+          (best, d) => Math.min(best, Math.hypot(d.x - run.skiff.x, d.y - run.skiff.y, d.z - run.skiff.z)),
+          Infinity,
+        );
+        closest = Math.min(closest, near);
+        if (near < 7.5) return run;
+      }
+      if (closest < 12) return run;
+    }
+  }
+
   if (name === 'paused') {
     const run = fly(build(), 24);
     pause(run);

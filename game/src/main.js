@@ -171,7 +171,9 @@ function frame(now) {
     handleActions();
     const stick = input.readStick();
     lastStrafe = stick.strafe;
-    if (run.state === 'playing') step(run, stick, dt);
+    // The simulation's lookYaw is radians per second; the mouse gives an angle, the keys a rate.
+    const lookYaw = stick.lookYaw / Math.max(dt, 1 / 240) + stick.yawRate;
+    if (run.state === 'playing') step(run, { ...stick, lookYaw }, dt);
     playEvents();
   }
   draw(dt);

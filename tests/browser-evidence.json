@@ -1,0 +1,75 @@
+{
+  "phase": "4 — browser QA and first screenshots",
+  "when": "2026-11-17T02:14Z–02:17Z",
+  "browser": {
+    "engine": "HeadlessChrome/145.0.0.0",
+    "platform": "Linux x86_64 (X11)",
+    "gl": "ANGLE (Google, Vulkan 1.3.0, SwiftShader Device (LLVM 10.0.0)) — CPU rasterizer, no GPU",
+    "viewports_tested": ["1280x720", "1280x800", "780x493 default tab"],
+    "served_from": "http://127.0.0.1:8123/ via the repository's own serve.ts"
+  },
+  "network": {
+    "resource_entries": 17,
+    "origins": ["http://127.0.0.1:8123"],
+    "external_requests": [],
+    "note": "performance.getEntriesByType('resource') on the running page; every entry is same-origin and inside game/. No font, image, audio or CDN fetch exists."
+  },
+  "console": { "errors": 0, "page_errors": 0 },
+  "real_input_checks": [
+    { "action": "Enter on the title", "observed": "state playing, depth reset to 0, HUD shown, title overlay hidden" },
+    { "action": "hold W 1.6 s", "observed": "depth 0 → 12.09 m, air 100 → 95.36, score 12" },
+    { "action": "hold A 0.8 s", "observed": "yaw 0 → 1.333 rad (1.6 rad/s); D 0.8 s brought it back to 0.053" },
+    { "action": "Space", "observed": "sonar charges 3 → 2, reveal 3.73 s" },
+    { "action": "Escape", "observed": "state paused, pause overlay shown; Escape again → playing" },
+    { "action": "left click on the canvas", "observed": "sonar fired; pointer lock requested but refused by this headless context, keyboard steering fallback works" }
+  ],
+  "frames": [
+    { "file": "screenshots/1-title.jpg", "bytes": 70713, "w": 1280, "h": 720, "mean_luma": 16.3, "bright_pct": 2.2, "max_luma": 251, "shot": "?shot=title", "shows": "title card over the trench, best score, full control list, press-to-dive" },
+    { "file": "screenshots/2-dive.jpg", "bytes": 39992, "w": 1280, "h": 720, "mean_luma": 27.7, "bright_pct": 2.2, "max_luma": 250, "shot": "?shot=play", "shows": "live dive at ~480 m flown by the pilot with the real rules, HUD, spore trail" },
+    { "file": "screenshots/3-threat.jpg", "bytes": 38547, "w": 1280, "h": 720, "mean_luma": 35.8, "bright_pct": 2.3, "max_luma": 248, "shot": "live play, 16 s of real W thrust after Enter", "shows": "deeper water, HUD live, threat warning frame lit by a nearby drifter" },
+    { "file": "screenshots/4-result.jpg", "bytes": 51499, "w": 1280, "h": 720, "mean_luma": 16.1, "bright_pct": 2.2, "max_luma": 254, "shot": "?shot=result", "shows": "result screen with outcome, score breakdown, best and R — dive again" }
+  ],
+  "render_cost": {
+    "draw_calls": 19,
+    "triangles": 2632,
+    "measured_how": "renderer.info.render after a staged play frame at 1280x720",
+    "fps": null,
+    "fps_note": "Not measured: requestAnimationFrame is throttled in this headless tab and gl.finish() does not prove a flush under ANGLE/SwiftShader. No fps claim is made."
+  },
+  "legibility_measured_at_1280x720": {
+    "depth": { "font_px": 37.44, "box": [25, 31, 70, 37], "inside_viewport": true },
+    "score": { "font_px": 21.6, "box": [1203, 31, 52, 24], "inside_viewport": true },
+    "spore_count": { "font_px": 16, "box": [1217, 635, 29, 18], "inside_viewport": true },
+    "prompt": { "font_px": 13, "box": [571, 693, 208, 15], "inside_viewport": true },
+    "beacon_line": { "font_px": 11, "box": [25, 74, 131, 12], "inside_viewport": true },
+    "best": { "font_px": 10, "box": [1203, 57, 52, 11], "inside_viewport": true },
+    "air_label": { "font_px": 9, "box": [627, 21, 14, 10], "inside_viewport": true },
+    "title_h1": { "font_px": 53.28, "inside_viewport": true },
+    "tagline": { "font_px": 12, "inside_viewport": true },
+    "finding": "All boxes sit inside the 1280x720 viewport with no overlap or clipping. The smallest labels are 9-11 px; at 1:1 they read, but the judge's contact sheet shrinks the cover to at most 768x480 (0.6x), where 9-11 px type will not read. Queued for phase 5: raise the minimum type scale and recapture."
+  },
+  "defects_found_and_fixed": [
+    {
+      "defect": "Keyboard steering was effectively inert: A/D produced ~0.02 rad/s instead of 1.6 rad/s, because a per-frame angle was multiplied by the simulation's per-second step.",
+      "evidence": "browser QA: yaw moved only 0.013 rad after holding A for 0.6 s",
+      "fix": "input.js now reports the mouse as an angle and the keys as a rate (yawRate); main.js converts the mouse angle into a rate for the frame. Re-checked in the browser: 0.8 s of A turned the skiff 1.333 rad.",
+      "test": "tests/run.test.mjs 'a yaw rate of one radian per second turns the skiff a radian in a second', including a 60 Hz vs 240 Hz agreement check"
+    },
+    {
+      "defect": "The threat warning used a 140 px inset box-shadow over the full screen, and the sonar used a fullscreen CSS bloom; with a CPU rasterizer these cost real milliseconds per frame.",
+      "evidence": "1280x720 pages became unresponsive to CDP evaluation during live play; the 780x493 tab did not",
+      "fix": "index.html: the warning is now a 2 px coloured frame; the heavy blur/shadows are gone"
+    }
+  ],
+  "open_risks": [
+    "fps is unverified in this environment (no GPU); only geometry cost is known",
+    "the staged ?shot=threat mode runs up to 4 x 90 s of simulation at load and twice crashed the headless renderer; the threat frame was therefore captured from live play instead, and the mode is a candidate for removal in phase 5",
+    "smallest HUD type (9-11 px) is below comfortable size for the judge's downscaled contact sheet"
+  ],
+  "entrypoint": {
+    "command": "MAKEFUN_OUTPUT_DIR=outA node main.ts",
+    "dossier_bytes": 355346,
+    "two_runs_identical": true,
+    "sha256": "4c46c6a8e28bdea96e2d4c740e83f62c948a28ae6e291fd58a820da8761d8402"
+  }
+}
