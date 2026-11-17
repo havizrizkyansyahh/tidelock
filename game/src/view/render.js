@@ -19,6 +19,9 @@ export class Render {
     this.camera.rotation.order = 'YXZ';
 
     this.reveal = 0;
+    this.shake = 0;
+    this.roll = 0;
+    this.fov = 74;
     this.resize();
     window.addEventListener('resize', () => this.resize());
   }
@@ -39,9 +42,32 @@ export class Render {
     this.scene.background.setHex(this.reveal > 0 ? 0x07231f : WATER);
   }
 
-  placeCamera(skiff) {
-    this.camera.position.set(skiff.x, skiff.y, skiff.z);
-    this.camera.rotation.set(skiff.pitch, skiff.yaw, 0);
+  /** A knock from a rock or a bite: quick, decaying, never enough to hide the trench. */
+  knock(amount = 0.35) {
+    this.shake = Math.min(1.2, this.shake + amount);
+  }
+
+  /**
+   * Put the lens in the skiff's seat: a slow swim bob, a sway that follows the side thrusters, a
+   * slight widening of the view with speed, and whatever shake is still ringing.
+   */
+  placeCamera(skiff, time = 0, speed = 0, strafe = 0, dt = 0) {
+    const alive = Math.min(1, speed / 13);
+    this.roll += ((-strafe * 0.07) - this.roll) * Math.min(1, dt * 8);
+    const bobY = Math.sin(time * 1.9) * 0.035 + Math.sin(time * 7.4) * 0.012 * alive;
+    const bobX = Math.cos(time * 1.3) * 0.026;
+    this.shake = Math.max(0, this.shake - dt * 2.2);
+    const jolt = this.shake * this.shake;
+    const shakeX = Math.sin(time * 61) * 0.09 * jolt;
+    const shakeY = Math.cos(time * 47) * 0.07 * jolt;
+    this.camera.position.set(skiff.x + bobX + shakeX, skiff.y + bobY + shakeY, skiff.z);
+    this.camera.rotation.set(skiff.pitch + Math.sin(time * 2.3) * 0.004, skiff.yaw, this.roll + Math.sin(time * 39) * 0.012 * jolt);
+    const wantedFov = 72 + alive * 6;
+    if (Math.abs(wantedFov - this.fov) > 0.05) {
+      this.fov += (wantedFov - this.fov) * Math.min(1, dt * 3);
+      this.camera.fov = this.fov;
+      this.camera.updateProjectionMatrix();
+    }
   }
 
   render() {

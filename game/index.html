@@ -61,6 +61,23 @@
   #prompt.show { opacity: 1; }
   #threat { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 120px rgba(255,95,109,0); transition: box-shadow .25s; }
   #threat.hot { box-shadow: inset 0 0 140px rgba(255,95,109,.45); }
+  /* Feedback layers: a damage wash, a sonar bloom, a milestone toast, and the crosshair. */
+  #flash, #bloom { position: fixed; inset: 0; pointer-events: none; opacity: 0; }
+  #flash { background: radial-gradient(ellipse at 50% 55%, rgba(255,95,109,0) 40%, rgba(255,95,109,.55) 100%); }
+  #bloom { background: radial-gradient(ellipse at 50% 50%, rgba(125,255,212,.18) 0%, rgba(125,255,212,0) 65%); }
+  #toast {
+    position: fixed; left: 50%; top: 26%; transform: translateX(-50%);
+    font-size: clamp(20px, 3.2vmin, 36px); letter-spacing: .22em; color: var(--beacon);
+    text-shadow: 0 0 26px rgba(255,230,168,.6); opacity: 0; transition: opacity .3s; text-align: center;
+  }
+  #toast.show { opacity: 1; }
+  #crosshair { position: fixed; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; pointer-events: none; opacity: .8; }
+  #crosshair i { position: absolute; background: rgba(216,255,244,.85); box-shadow: 0 0 6px rgba(125,255,212,.8); }
+  #crosshair i:nth-child(1) { left: 12px; top: 3px; width: 2px; height: 7px; }
+  #crosshair i:nth-child(2) { left: 12px; bottom: 3px; width: 2px; height: 7px; }
+  #crosshair i:nth-child(3) { top: 12px; left: 3px; height: 2px; width: 7px; }
+  #crosshair i:nth-child(4) { top: 12px; right: 3px; height: 2px; width: 7px; }
+  #crosshair.hot i { background: var(--beacon); box-shadow: 0 0 10px rgba(255,230,168,.9); }
 
   .screen { position: fixed; inset: 0; display: none; place-items: center; padding: 4vmin; background: radial-gradient(ellipse at 50% 40%, rgba(3,24,20,.55), rgba(1,8,7,.92)); }
   .screen.show { display: grid; }
@@ -85,6 +102,10 @@
   <canvas id="view" aria-label="TIDELOCK trench view"></canvas>
   <div id="glass"></div>
   <div id="threat"></div>
+  <div id="bloom"></div>
+  <div id="flash"></div>
+  <div id="toast"></div>
+  <div id="crosshair"><i></i><i></i><i></i><i></i></div>
 
   <div id="hud" hidden>
     <div class="row">
@@ -115,6 +136,7 @@
         <div id="spores"><span id="spore-count">0</span> <span id="combo"></span></div>
         <div class="label" style="margin-top:8px">sonar</div>
         <div id="pips"></div>
+        <div class="meter" id="sonar-cd" style="height:4px;margin-top:6px"><i></i></div>
       </div>
     </div>
   </div>

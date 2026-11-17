@@ -3,6 +3,7 @@
 import { Render } from './view/render.js';
 import { TrenchView } from './view/trenchview.js';
 import { EntitiesView } from './view/entitiesview.js';
+import { LightShafts } from './view/lightshafts.js';
 import { Hud } from './ui/hud.js';
 import { Screens } from './ui/screens.js';
 import { Sound } from './audio/audio.js';
@@ -14,6 +15,7 @@ const canvas = document.getElementById('view');
 const render = new Render(canvas);
 const trench = new TrenchView(render.scene);
 const entities = new EntitiesView(render.scene);
+const shafts = new LightShafts(render.scene);
 const hud = new Hud(document);
 const screens = new Screens(document);
 const sound = new Sound();
@@ -39,6 +41,7 @@ if (shotMode) {
 }
 
 let mutedNote = 0;
+let lastStrafe = 0;
 /** Which overlay the player is looking at: separate from the simulation's own state. */
 let ui = 'title';
 
@@ -65,6 +68,7 @@ function beginDive() {
   else if (run.state === 'title' || run.state === 'paused') restart(run);
   else start(run);
   ui = 'playing';
+  hud.reset();
   screens.hideAll();
   hud.show(true);
   input.lock();
@@ -103,7 +107,10 @@ function handleActions() {
   }
   if (run.state === 'playing') {
     if (input.takeAction('sonar')) {
-      if (fireSonar(run)) sound.ping();
+      if (fireSonar(run)) {
+        sound.ping();
+        hud.bloom();
+      }
     }
     if (input.takeAction('surface')) {
       if (surface(run)) {
@@ -119,8 +126,17 @@ function handleActions() {
 function playEvents() {
   for (const event of run.events) {
     if (event.type === 'spore') sound.pickup(event.combo);
-    else if (event.type === 'rock') sound.hit();
-    else if (event.type === 'bite') sound.bite();
+    else if (event.type === 'rock') {
+      sound.hit();
+      render.knock(0.9);
+      hud.flash(1);
+    } else if (event.type === 'bite') {
+      sound.bite();
+      render.knock(0.45);
+      hud.flash(0.6);
+    } else if (event.type === 'sonar') {
+      hud.bloom();
+    }
     else if (event.type === 'beacon') sound.beacon();
     else if (event.type === 'end') {
       sound.end(event.outcome === 'surfaced');
@@ -132,13 +148,16 @@ function playEvents() {
   run.events.length = 0;
 }
 
-function draw() {
+function draw(dt = 0) {
   render.setReveal(run.reveal);
-  render.placeCamera(run.skiff);
+  render.placeCamera(run.skiff, run.time, run.skiff.speed, lastStrafe, dt);
   trench.update(run, run.reveal);
+  shafts.update(run, run.time);
   entities.update(run, render.camera, run.time);
   render.render();
   hud.update(run, nextBeacon(run));
+  hud.milestone(run.depth);
+  hud.tick(dt);
   sound.setThrust(run.state === 'playing' ? run.skiff.speed / 13 : 0);
   sound.setAlarm(run.state === 'playing' && run.air < 25);
 }
@@ -150,10 +169,12 @@ function frame(now) {
 
   if (!shotMode) {
     handleActions();
-    if (run.state === 'playing') step(run, input.readStick(), dt);
+    const stick = input.readStick();
+    lastStrafe = stick.strafe;
+    if (run.state === 'playing') step(run, stick, dt);
     playEvents();
   }
-  draw();
+  draw(dt);
   requestAnimationFrame(frame);
 }
 
@@ -181,4 +202,14 @@ window.__tidelock = {
     muted: mutedNote,
     pointerLocked: input.pointerLocked,
   }),
+  /** Cost of the real scene, measured without the browser's frame scheduling in the way. */
+  measure: (frames = 30) => {
+    const gl = render.renderer.getContext();
+    const started = performance.now();
+    for (let i = 0; i < frames; i += 1) {
+      render.render();
+      gl.finish();
+    }
+    return { frames, msPerFrame: Number(((performance.now() - started) / frames).toFixed(2)) };
+  },
 };

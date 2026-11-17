@@ -132,11 +132,11 @@ it stays crisp at 1280×720 and 1440×900.
 | `game/src/core/skiff.js` | skiff motion integration and collision response (pure math) |
 | `game/src/core/trench.js` | deterministic section generation: rock, spores, drifters, beacons |
 | `game/src/core/run.js` | run state machine, events, scoring, end conditions (pure) |
-| `game/src/view/renderer.js` | three.js renderer, camera, fog, resize |
-| `game/src/view/trenchview.js` | instanced rock walls, seafloor, streaming by depth |
-| `game/src/view/entitiesview.js` | pooled spore, drifter and beacon meshes |
-| `game/src/view/sonarfx.js` | pulse ring, reveal, hit flash, camera shake |
-| `game/src/view/cockpit.js` | first-person skiff frame and instrument glows |
+| `game/src/view/render.js` | three.js renderer, camera, fog, camera bob, sway, knock |
+| `game/src/view/trenchview.js` | trench shell and instanced rock columns, dragged with the skiff |
+| `game/src/view/entitiesview.js` | pooled spore, drifter, beacon and sonar meshes |
+| `game/src/view/lightshafts.js` | drifting additive light shafts |
+| `game/index.html` (CSS vignette) | the cockpit frame, in place of a 3D cockpit mesh |
 | `game/src/ui/hud.js` | DOM HUD writer |
 | `game/src/ui/screens.js` | title, pause, result overlays and their input |
 | `game/src/audio/audio.js` | WebAudio synthesis: drone, thrust, ping, pickup, hit, alarm |

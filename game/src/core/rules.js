@@ -47,6 +47,19 @@ export function airDrainPerSecond(depth) {
   return 2.2 + d * 0.0008;
 }
 
+/** Depth feedback arrives every hundred metres. */
+export const MILESTONE_STEP = 100;
+
+/**
+ * The milestone a dive has just crossed, or null. `announced` is the last one the HUD showed, so
+ * crossing 100 m pays once and never again, and a shallower depth never re-announces an older one.
+ */
+export function milestoneAt(depth, announced = 0) {
+  if (!Number.isFinite(depth) || depth < MILESTONE_STEP) return null;
+  const reached = Math.floor(depth / MILESTONE_STEP) * MILESTONE_STEP;
+  return reached > announced ? reached : null;
+}
+
 /**
  * Air left after `dt` seconds at `depth`. `boosting` multiplies the drain by 1.4, and the
  * tank floors at zero rather than going negative.
