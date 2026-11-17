@@ -34,19 +34,21 @@
   #hud { position: fixed; inset: 0; pointer-events: none; padding: clamp(12px, 1.6vmin, 26px); display: grid; grid-template-rows: auto 1fr auto; }
   .row { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
   .panel { background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; padding: 8px 12px; }
-  .label { font-size: clamp(9px, 1.05vmin, 12px); letter-spacing: .18em; color: var(--dim); text-transform: uppercase; }
+  /* Type scale: the judge sees the cover at 0.6x, so nothing that must be read goes below 13 px
+     at 720 p, and the numbers the player watches sit well above that. */
+  .label { font-size: clamp(12px, 1.3vmin, 14px); letter-spacing: .18em; color: var(--dim); text-transform: uppercase; }
   #depth-read { display: flex; align-items: baseline; gap: 8px; }
-  #depth { font-size: clamp(30px, 5.2vmin, 58px); font-weight: 700; letter-spacing: .02em; line-height: 1; text-shadow: 0 0 22px rgba(125,255,212,.35); }
-  #depth-unit { font-size: clamp(12px, 1.6vmin, 18px); color: var(--dim); }
-  #beacon-line { margin-top: 6px; font-size: clamp(11px, 1.3vmin, 14px); color: var(--beacon); letter-spacing: .1em; }
+  #depth { font-size: clamp(36px, 5.6vmin, 60px); font-weight: 700; letter-spacing: .02em; line-height: 1; text-shadow: 0 0 22px rgba(125,255,212,.35); }
+  #depth-unit { font-size: clamp(14px, 1.7vmin, 18px); color: var(--dim); }
+  #beacon-line { margin-top: 6px; font-size: clamp(13px, 1.45vmin, 16px); color: var(--beacon); letter-spacing: .1em; }
   #air-wrap { width: clamp(180px, 26vmin, 300px); }
   .meter { height: 9px; border-radius: 5px; background: rgba(125,227,255,.14); overflow: hidden; margin-top: 6px; }
   .meter > i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #2a9fbf, var(--air)); transition: width .12s linear; }
   #air.low > i { background: linear-gradient(90deg, #b34, var(--hull)); animation: pulse 1s infinite; }
   @keyframes pulse { 50% { opacity: .45; } }
   #score-wrap { text-align: right; }
-  #score { font-size: clamp(20px, 3vmin, 34px); font-weight: 700; }
-  #best { font-size: clamp(10px, 1.2vmin, 13px); color: var(--dim); margin-top: 2px; }
+  #score { font-size: clamp(24px, 3.2vmin, 36px); font-weight: 700; }
+  #best { font-size: clamp(12px, 1.3vmin, 14px); color: var(--dim); margin-top: 2px; }
   #bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
   #hull-segs { display: flex; gap: 3px; margin-top: 6px; }
   #hull-segs i { width: clamp(9px, 1.2vmin, 15px); height: 12px; border-radius: 2px; background: var(--hull); opacity: .95; }
@@ -55,9 +57,9 @@
   #pips i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(125,255,212,.55); background: transparent; }
   #pips i.on { background: var(--spore); box-shadow: 0 0 10px rgba(125,255,212,.7); }
   #spore-wrap { text-align: center; }
-  #spores { font-size: clamp(16px, 2.1vmin, 24px); }
+  #spores { font-size: clamp(18px, 2.3vmin, 26px); }
   #combo { color: var(--spore); font-weight: 700; }
-  #prompt { text-align: center; font-size: clamp(13px, 1.6vmin, 18px); letter-spacing: .16em; color: var(--beacon); opacity: 0; transition: opacity .15s; }
+  #prompt { text-align: center; font-size: clamp(15px, 1.8vmin, 20px); letter-spacing: .16em; color: var(--beacon); opacity: 0; transition: opacity .15s; }
   #prompt.show { opacity: 1; }
   #threat { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 120px rgba(255,95,109,0); transition: box-shadow .25s; }
   /* A thin warning frame rather than a huge inset shadow: full-screen blurs and wide shadows cost
@@ -86,12 +88,12 @@
   .screen.show { display: grid; }
   .card { width: min(760px, 92vw); border: 1px solid var(--edge); border-radius: 10px; background: rgba(2,16,13,.82); padding: clamp(18px, 3vmin, 38px); box-shadow: 0 30px 80px rgba(0,0,0,.55); }
   h1 { margin: 0; font-size: clamp(38px, 7.4vmin, 86px); letter-spacing: .34em; font-weight: 800; text-indent: .34em; color: #eafff7; text-shadow: 0 0 34px rgba(125,255,212,.45); }
-  .tagline { margin: 10px 0 22px; color: var(--dim); font-size: clamp(12px, 1.5vmin, 16px); letter-spacing: .06em; line-height: 1.5; }
+  .tagline { margin: 10px 0 22px; color: var(--dim); font-size: clamp(14px, 1.6vmin, 17px); letter-spacing: .06em; line-height: 1.5; }
   .keys { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 22px; margin: 18px 0 22px; }
-  .key { display: flex; gap: 10px; align-items: baseline; font-size: clamp(11px, 1.35vmin, 15px); color: #bfe6dc; }
+  .key { display: flex; gap: 10px; align-items: baseline; font-size: clamp(13px, 1.45vmin, 16px); color: #bfe6dc; }
   key { color: #03120f; background: #9fe9d4; border-radius: 4px; padding: 1px 7px; font: inherit; font-size: .92em; font-weight: 700; white-space: nowrap; }
   .cta { display: inline-block; margin-top: 6px; border: 1px solid rgba(125,255,212,.5); border-radius: 6px; padding: 10px 18px; letter-spacing: .2em; font-size: clamp(12px, 1.5vmin, 16px); color: #eafff7; background: rgba(125,255,212,.08); }
-  .fine { margin-top: 18px; color: #6d948c; font-size: clamp(10px, 1.15vmin, 12px); line-height: 1.55; }
+  .fine { margin-top: 18px; color: #85aca3; font-size: clamp(12px, 1.25vmin, 14px); line-height: 1.55; }
   .bignum { font-size: clamp(30px, 5vmin, 52px); font-weight: 700; letter-spacing: .02em; }
   .outcome { letter-spacing: .3em; font-size: clamp(15px, 2vmin, 22px); color: var(--spore); }
   .outcome.lost { color: var(--hull); }

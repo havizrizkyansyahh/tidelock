@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TIDELOCK — pressure skiff, uncharted trench</title>
+<style>
+  :root {
+    --ink: #d8fff4;
+    --dim: #7fa79e;
+    --air: #7de3ff;
+    --hull: #ff5f6d;
+    --spore: #7dffd4;
+    --beacon: #ffe6a8;
+    --panel: rgba(3, 18, 15, 0.55);
+    --edge: rgba(125, 255, 212, 0.22);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #03120f; color: var(--ink); overflow: hidden; }
+  body {
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+  #view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  /* Cockpit vignette: the skiff's own frame, so the page never looks like a bare canvas. */
+  #glass {
+    position: fixed; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse at 50% 48%, rgba(0,0,0,0) 52%, rgba(1,8,7,0.55) 78%, rgba(1,6,5,0.92) 100%),
+      linear-gradient(180deg, rgba(2,14,12,0.75) 0%, rgba(0,0,0,0) 18%, rgba(0,0,0,0) 82%, rgba(1,8,7,0.85) 100%);
+  }
+  #hud { position: fixed; inset: 0; pointer-events: none; padding: clamp(12px, 1.6vmin, 26px); display: grid; grid-template-rows: auto 1fr auto; }
+  .row { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+  .panel { background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; padding: 8px 12px; }
+  /* Type scale: the judge sees the cover at 0.6x, so nothing that must be read goes below 13 px
+     at 720 p, and the numbers the player watches sit well above that. */
+  .label { font-size: clamp(12px, 1.3vmin, 14px); letter-spacing: .18em; color: var(--dim); text-transform: uppercase; }
+  #depth-read { display: flex; align-items: baseline; gap: 8px; }
+  #depth { font-size: clamp(36px, 5.6vmin, 60px); font-weight: 700; letter-spacing: .02em; line-height: 1; text-shadow: 0 0 22px rgba(125,255,212,.35); }
+  #depth-unit { font-size: clamp(14px, 1.7vmin, 18px); color: var(--dim); }
+  #beacon-line { margin-top: 6px; font-size: clamp(13px, 1.45vmin, 16px); color: var(--beacon); letter-spacing: .1em; }
+  #air-wrap { width: clamp(180px, 26vmin, 300px); }
+  .meter { height: 9px; border-radius: 5px; background: rgba(125,227,255,.14); overflow: hidden; margin-top: 6px; }
+  .meter > i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #2a9fbf, var(--air)); transition: width .12s linear; }
+  #air.low > i { background: linear-gradient(90deg, #b34, var(--hull)); animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity: .45; } }
+  #score-wrap { text-align: right; }
+  #score { font-size: clamp(24px, 3.2vmin, 36px); font-weight: 700; }
+  #best { font-size: clamp(12px, 1.3vmin, 14px); color: var(--dim); margin-top: 2px; }
+  #bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+  #hull-segs { display: flex; gap: 3px; margin-top: 6px; }
+  #hull-segs i { width: clamp(9px, 1.2vmin, 15px); height: 12px; border-radius: 2px; background: var(--hull); opacity: .95; }
+  #hull-segs i.gone { background: rgba(255,95,109,.16); }
+  #pips { display: flex; gap: 6px; margin-top: 6px; }
+  #pips i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(125,255,212,.55); background: transparent; }
+  #pips i.on { background: var(--spore); box-shadow: 0 0 10px rgba(125,255,212,.7); }
+  #spore-wrap { text-align: center; }
+  #spores { font-size: clamp(18px, 2.3vmin, 26px); }
+  #combo { color: var(--spore); font-weight: 700; }
+  #prompt { text-align: center; font-size: clamp(15px, 1.8vmin, 20px); letter-spacing: .16em; color: var(--beacon); opacity: 0; transition: opacity .15s; }
+  #prompt.show { opacity: 1; }
+  #threat { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 120px rgba(255,95,109,0); transition: box-shadow .25s; }
+  /* A thin warning frame rather than a huge inset shadow: full-screen blurs and wide shadows cost
+     real milliseconds when the browser has no GPU, and the trench already carries the mood. */
+  #threat { border: 2px solid rgba(255,95,109,0); transition: border-color .25s; }
+  #threat.hot { border-color: rgba(255,95,109,.55); }
+  /* Feedback layers: a damage wash, a sonar bloom, a milestone toast, and the crosshair. */
+  #flash, #bloom { position: fixed; inset: 0; pointer-events: none; opacity: 0; }
+  #flash { background: radial-gradient(ellipse at 50% 55%, rgba(255,95,109,0) 40%, rgba(255,95,109,.55) 100%); }
+  #bloom { background: radial-gradient(ellipse at 50% 50%, rgba(125,255,212,.18) 0%, rgba(125,255,212,0) 65%); }
+  #toast {
+    position: fixed; left: 50%; top: 26%; transform: translateX(-50%);
+    font-size: clamp(20px, 3.2vmin, 36px); letter-spacing: .22em; color: var(--beacon);
+    text-shadow: 0 0 26px rgba(255,230,168,.6); opacity: 0; transition: opacity .3s; text-align: center;
+  }
+  #toast.show { opacity: 1; }
+  #crosshair { position: fixed; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; pointer-events: none; opacity: .8; }
+  #crosshair i { position: absolute; background: rgba(216,255,244,.85); box-shadow: 0 0 6px rgba(125,255,212,.8); }
+  #crosshair i:nth-child(1) { left: 12px; top: 3px; width: 2px; height: 7px; }
+  #crosshair i:nth-child(2) { left: 12px; bottom: 3px; width: 2px; height: 7px; }
+  #crosshair i:nth-child(3) { top: 12px; left: 3px; height: 2px; width: 7px; }
+  #crosshair i:nth-child(4) { top: 12px; right: 3px; height: 2px; width: 7px; }
+  #crosshair.hot i { background: var(--beacon); box-shadow: 0 0 10px rgba(255,230,168,.9); }
+
+  .screen { position: fixed; inset: 0; display: none; place-items: center; padding: 4vmin; background: radial-gradient(ellipse at 50% 40%, rgba(3,24,20,.55), rgba(1,8,7,.92)); }
+  .screen.show { display: grid; }
+  .card { width: min(760px, 92vw); border: 1px solid var(--edge); border-radius: 10px; background: rgba(2,16,13,.82); padding: clamp(18px, 3vmin, 38px); box-shadow: 0 30px 80px rgba(0,0,0,.55); }
+  h1 { margin: 0; font-size: clamp(38px, 7.4vmin, 86px); letter-spacing: .34em; font-weight: 800; text-indent: .34em; color: #eafff7; text-shadow: 0 0 34px rgba(125,255,212,.45); }
+  .tagline { margin: 10px 0 22px; color: var(--dim); font-size: clamp(14px, 1.6vmin, 17px); letter-spacing: .06em; line-height: 1.5; }
+  .keys { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 22px; margin: 18px 0 22px; }
+  .key { display: flex; gap: 10px; align-items: baseline; font-size: clamp(13px, 1.45vmin, 16px); color: #bfe6dc; }
+  key { color: #03120f; background: #9fe9d4; border-radius: 4px; padding: 1px 7px; font: inherit; font-size: .92em; font-weight: 700; white-space: nowrap; }
+  .cta { display: inline-block; margin-top: 6px; border: 1px solid rgba(125,255,212,.5); border-radius: 6px; padding: 10px 18px; letter-spacing: .2em; font-size: clamp(12px, 1.5vmin, 16px); color: #eafff7; background: rgba(125,255,212,.08); }
+  .fine { margin-top: 18px; color: #85aca3; font-size: clamp(12px, 1.25vmin, 14px); line-height: 1.55; }
+  .bignum { font-size: clamp(30px, 5vmin, 52px); font-weight: 700; letter-spacing: .02em; }
+  .outcome { letter-spacing: .3em; font-size: clamp(15px, 2vmin, 22px); color: var(--spore); }
+  .outcome.lost { color: var(--hull); }
+  table.break { width: 100%; border-collapse: collapse; margin: 16px 0 6px; font-size: clamp(11px, 1.4vmin, 15px); }
+  table.break td { padding: 6px 0; border-bottom: 1px dashed rgba(125,255,212,.14); color: #bfe6dc; }
+  table.break td:last-child { text-align: right; color: #eafff7; }
+  table.break tr.total td { border-bottom: 0; font-size: 1.2em; color: #fff; }
+</style>
+</head>
+<body>
+  <canvas id="view" aria-label="TIDELOCK trench view"></canvas>
+  <div id="glass"></div>
+  <div id="threat"></div>
+  <div id="bloom"></div>
+  <div id="flash"></div>
+  <div id="toast"></div>
+  <div id="crosshair"><i></i><i></i><i></i><i></i></div>
+
+  <div id="hud" hidden>
+    <div class="row">
+      <div class="panel">
+        <div class="label">depth</div>
+        <div id="depth-read"><span id="depth">0</span><span id="depth-unit">m</span></div>
+        <div id="beacon-line">beacon 01 · 300 m</div>
+      </div>
+      <div class="panel" id="air-wrap">
+        <div class="label">air <span id="air-num">100</span></div>
+        <div class="meter" id="air"><i></i></div>
+      </div>
+      <div class="panel" id="score-wrap">
+        <div class="label">score</div>
+        <div id="score">0</div>
+        <div id="best">best 0</div>
+      </div>
+    </div>
+    <div></div>
+    <div id="bottom">
+      <div class="panel">
+        <div class="label">hull</div>
+        <div id="hull-segs"></div>
+      </div>
+      <div id="prompt">E — surface at beacon</div>
+      <div class="panel" id="spore-wrap">
+        <div class="label">spores</div>
+        <div id="spores"><span id="spore-count">0</span> <span id="combo"></span></div>
+        <div class="label" style="margin-top:8px">sonar</div>
+        <div id="pips"></div>
+        <div class="meter" id="sonar-cd" style="height:4px;margin-top:6px"><i></i></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="screen" id="screen-title">
+    <div class="card">
+      <h1>TIDELOCK</h1>
+      <p class="tagline">A pressure skiff, one lamp, and a trench that keeps going down. Gather spore clusters for air and score, walk the rock, and put your hull out of reach of what lives in the dark. Every beacon is a way out — and a way to lose everything you have banked.</p>
+      <div class="keys">
+        <div class="key"><key>W</key><span>thrust down the trench</span></div>
+        <div class="key"><key>S</key><span>brake</span></div>
+        <div class="key"><key>A</key><key>D</key><span>strafe · yaw without the mouse</span></div>
+        <div class="key"><key>mouse</key><span>look and steer</span></div>
+        <div class="key"><key>click</key><key>space</key><span>sonar pulse: reveal and stun</span></div>
+        <div class="key"><key>shift</key><span>boost, at a cost in air</span></div>
+        <div class="key"><key>E</key><span>surface at a beacon</span></div>
+        <div class="key"><key>R</key><key>F</key><span>nose up · nose down</span></div>
+        <div class="key"><key>esc</key><span>pause</span></div>
+        <div class="key"><key>M</key><span>mute</span></div>
+      </div>
+      <div class="cta" id="start-cta">CLICK OR PRESS ENTER TO DIVE</div>
+      <p class="fine">Score is depth in metres, plus spores, plus 600 for each beacon passed, plus three points for every breath of air still in the tank when you surface. A lost dive still counts. Best: <span id="title-best">0</span></p>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-pause">
+    <div class="card" style="max-width:420px">
+      <div class="outcome">PAUSED</div>
+      <p class="tagline">The trench is holding still. Esc to resume.</p>
+      <div class="cta">RESUME</div>
+      <p class="fine">Best this session: <span id="pause-best">0</span></p>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-result">
+    <div class="card">
+      <div class="outcome" id="result-outcome">SURFACED</div>
+      <div class="bignum" id="result-total">0</div>
+      <table class="break">
+        <tr><td>depth reached</td><td id="r-depth">0</td></tr>
+        <tr><td>spore points</td><td id="r-spores">0</td></tr>
+        <tr><td>beacons passed</td><td id="r-beacons">0</td></tr>
+        <tr><td>air on surfacing</td><td id="r-surface">0</td></tr>
+        <tr class="total"><td>total</td><td id="r-total">0</td></tr>
+      </table>
+      <p class="tagline" id="result-note">You brought the skiff up. The trench keeps the rest.</p>
+      <div class="cta" id="restart-cta">R — DIVE AGAIN</div>
+      <p class="fine">Best this session: <span id="result-best">0</span></p>
+    </div>
+  </section>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

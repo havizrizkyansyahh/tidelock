@@ -184,6 +184,16 @@ presentScreens();
 draw();
 requestAnimationFrame(frame);
 
+// A hidden tab must not fly the skiff into a wall while nobody is looking: pause on the way out.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && run.state === 'playing' && ui === 'playing' && !shotMode) {
+    pause(run);
+    ui = 'paused';
+    screens.pause(run.best);
+    document.exitPointerLock?.();
+  }
+});
+
 // A small, honest window onto the running game: used by the build's own browser checks.
 window.__tidelock = {
   get run() {

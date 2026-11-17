@@ -28,8 +28,9 @@ export class Hud {
       crosshair: document.getElementById('crosshair'),
       sonarCd: document.querySelector('#sonar-cd > i'),
     };
-    this.el.hull.innerHTML = '<i></i>'.repeat(HULL_SEGMENTS);
-    this.el.pips.innerHTML = '<i></i>'.repeat(SONAR_PIPS);
+    // Built node by node, never through innerHTML: the HUD never parses markup at run time.
+    for (let i = 0; i < HULL_SEGMENTS; i += 1) this.el.hull.appendChild(document.createElement('i'));
+    for (let i = 0; i < SONAR_PIPS; i += 1) this.el.pips.appendChild(document.createElement('i'));
     this.hullSegs = [...this.el.hull.children];
     this.pips = [...this.el.pips.children];
     this.last = {};
