@@ -1,0 +1,14 @@
+# Local build output and scratch
+/out/
+/output/
+/node_modules/
+*.log
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+*.swp
+
+# The shipped artifacts are tracked on purpose: game/ and screenshots/ are the entry.
+!game/
+!screenshots/
