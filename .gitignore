@@ -1,8 +1,13 @@
 # Local build output and scratch
 /out/
 /output/
+/outA/
+/outB/
+/out-audit-a/
+/out-audit-b/
 /node_modules/
 *.log
+*.tar.gz
 
 # Editor and OS noise
 .DS_Store
