@@ -25,7 +25,7 @@ and drifters that cost hull, and beacons where the dive can be banked as a win o
 
 ```
 $ node --test tests/
-tests 41   pass 41   fail 0
+tests 44   pass 44   fail 0   (2026-11-17: +3 input-contract tests)
 ```
 
 Coverage by file: `rules.test.mjs` 8 (air drain, combo, score), `trench.test.mjs` 11 (determinism,
@@ -135,7 +135,7 @@ The final audit ran on **Node v22.22.0**, the grader's major version
 $ node --version                     # the Node 22 binary
 v22.22.0
 $ node --test tests/rules.test.mjs tests/trench.test.mjs tests/run.test.mjs tests/feel.test.mjs
-# tests 41   # pass 41   # fail 0
+# tests 44   # pass 44   # fail 0
 $ node tools/audit-build.mjs
 "passed": 18, "failed": 0
 ```
@@ -163,7 +163,7 @@ form works; both were exercised during the build.
 ## 7. How to reproduce
 
 ```
-node --test tests/*.test.mjs             # 41 unit tests (name the files on Node 22)
+node --test tests/*.test.mjs             # 44 unit tests (name the files on Node 22)
 node serve.ts --port 8123                # play at http://localhost:8123
 node tools/audit-build.mjs               # 18 output checks, writes tests/build-audit.json
 mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts

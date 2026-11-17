@@ -23,6 +23,13 @@ const screens = new Screens(document);
 const sound = new Sound();
 const input = new Input(canvas);
 
+// The title, pause and result cards tell the player to click; route those clicks through the same
+// action queue the keyboard uses, so a pointer gesture starts and resumes the dive too.
+for (const id of ['start-cta', 'resume-cta', 'restart-cta']) {
+  const card = document.getElementById(id);
+  if (card) card.addEventListener('click', () => input.press('start'));
+}
+
 const params = new URLSearchParams(location.search);
 const shot = params.get('shot');
 const shotMode = shot !== null;

@@ -3,12 +3,12 @@
     {
       "name": "both runs rebuild to the same dossier",
       "ok": true,
-      "detail": "37b330cd0255414c223a3bf5d71fd47262eddb8d6400b85de2588491b6a6d950"
+      "detail": "473e4772152dbb68500bcaf880d2793a0869e828536b5e396e16c6abcbd8046a"
     },
     {
       "name": "dossier.json matches an independent helper rebuild",
       "ok": true,
-      "detail": "438388 bytes, sha256 37b330cd0255414c223a3bf5d71fd47262eddb8d6400b85de2588491b6a6d950"
+      "detail": "438988 bytes, sha256 473e4772152dbb68500bcaf880d2793a0869e828536b5e396e16c6abcbd8046a"
     },
     {
       "name": "every game/ path within 1000 UTF-8 bytes",
@@ -38,7 +38,7 @@
     {
       "name": "game/ bytes within 48 MiB",
       "ok": true,
-      "detail": "2228450 bytes"
+      "detail": "2229035 bytes"
     },
     {
       "name": "game/ entry count within 993",
@@ -48,7 +48,7 @@
     {
       "name": "index.html is a regular file within 1 MiB",
       "ok": true,
-      "detail": "12286 bytes"
+      "detail": "12302 bytes"
     },
     {
       "name": "no network address in index.html",
@@ -63,7 +63,7 @@
     {
       "name": "no source was cut from the dossier",
       "ok": true,
-      "detail": "95038 bytes of dossier text"
+      "detail": "95623 bytes of dossier text"
     },
     {
       "name": "screenshot names are URL-safe",
@@ -95,14 +95,14 @@
   "summary": {
     "node": "v22.22.0",
     "outputs": {
-      "a": "37b330cd0255414c223a3bf5d71fd47262eddb8d6400b85de2588491b6a6d950",
+      "a": "473e4772152dbb68500bcaf880d2793a0869e828536b5e396e16c6abcbd8046a",
       "paths": 25
     },
-    "dossierBytes": 438388,
+    "dossierBytes": 438988,
     "game": {
       "entries": 27,
       "files": 20,
-      "bytes": 2228450
+      "bytes": 2229035
     },
     "screenshots": [
       {

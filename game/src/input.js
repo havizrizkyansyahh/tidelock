@@ -68,7 +68,8 @@ export class Input {
     const thrust = (held.has('thrust') ? 1 : 0) - (held.has('brake') ? 1 : 0);
     // Without pointer lock, A/D turn the skiff; with it, the mouse does, so A/D strafe instead.
     const strafe = this.pointerLocked
-      ? (held.has('strafeRight') ? 1 : 0) - (held.has('strafeLeft') ? 1 : 0)
+      ? ((held.has('strafeRight') || held.has('yawRight') ? 1 : 0)
+        - (held.has('strafeLeft') || held.has('yawLeft') ? 1 : 0))
       : 0;
     // A keyboard turn is a rate in radians per second; a mouse move is an angle already turned.
     // They are reported apart so the loop can convert the mouse into a rate for this frame.
@@ -95,6 +96,11 @@ export class Input {
     if (!this.actions.has(name)) return false;
     this.actions.delete(name);
     return true;
+  }
+
+  /** Queue an action from a pointer gesture, so a click does what the matching key does. */
+  press(name) {
+    this.actions.add(name);
   }
 
   clearActions() {
